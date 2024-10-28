@@ -24,7 +24,7 @@ class VimeoVideoConfig {
         width: json['width'],
         language: json['language'],
         height: json['height'],
-        files: (json['files'] as List<dynamic>).map((fileJson) => VimeoVideoFile.fromJson(fileJson)).toList(),
+        files: (json['files'] as List<dynamic>? ?? []).map((fileJson) => VimeoVideoFile.fromJson(fileJson)).toList(),
       );
 
   String? uri;
