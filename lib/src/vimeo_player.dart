@@ -72,8 +72,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
   /// video player controller
   VideoPlayerController? _videoPlayerController;
 
-  final VideoPlayerController _emptyVideoPlayerController =
-      VideoPlayerController.networkUrl(Uri.parse(''));
+  final VideoPlayerController _emptyVideoPlayerController = VideoPlayerController.networkUrl(Uri.parse(''));
 
   /// flick manager to manage the flick player
   FlickManager? _flickManager;
@@ -124,8 +123,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     /// checking that vimeo url is valid or not
     if (_isVimeoVideo) {
       if (_videoId.isEmpty) {
-        throw (Exception(
-            'Unable extract video id from given vimeo video url: ${widget.url}'));
+        throw (Exception('Unable extract video id from given vimeo video url: ${widget.url}'));
       }
 
       if (currentLink == '') _videoPlayer('', Duration(seconds: 0));
@@ -182,8 +180,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
                       onUpdate: updateCurrentLink,
                     ),
                   ),
-                  flickVideoWithControlsFullscreen:
-                      const FlickVideoWithControls(
+                  flickVideoWithControlsFullscreen: const FlickVideoWithControls(
                     controls: FlickLandscapeControls(),
                   ),
                 )
@@ -212,9 +209,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     if (startAt != null && _videoPlayerController != null) {
       _videoPlayerController!.addListener(() {
         final VideoPlayerValue videoData = _videoPlayerController!.value;
-        if (videoData.isInitialized &&
-            videoData.duration > startAt! &&
-            !_isSeekedVideo) {
+        if (videoData.isInitialized && videoData.duration > startAt! && !_isSeekedVideo) {
           _videoPlayerController!.seekTo(startAt);
           _isSeekedVideo = true;
         } // else ignore, incorrect value
@@ -226,8 +221,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     final onProgressCallback = widget.onProgress;
     final onFinishCallback = widget.onFinished;
 
-    if (_videoPlayerController != null &&
-        (onProgressCallback != null || onFinishCallback != null)) {
+    if (_videoPlayerController != null && (onProgressCallback != null || onFinishCallback != null)) {
       _videoPlayerController!.addListener(() {
         final VideoPlayerValue videoData = _videoPlayerController!.value;
         if (videoData.isInitialized) {
@@ -248,8 +242,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
 
   void _checkPlayingStatus() {
     Future.delayed(Duration(seconds: 1), () {
-      if (_videoPlayerController != null &&
-          _videoPlayerController!.value.isInitialized) {
+      if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
         VideoPlayerValue videoData = _videoPlayerController!.value;
 
         // Update the visibility of the settings button based on playing status
@@ -273,16 +266,14 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
 
       List<VimeoVideoFile>? files = progressiveList;
 
-      var vimeoMp4Video = '';
-
+      var vimeoMp4Video = value?.playerEmbedUrl ?? '';
 
       if (files != null && files.isNotEmpty) {
         this.files.value = files;
 
         // Filter valid links and convert to a list
         var validLinks = files
-            .where(
-                (element) => element.link != null && element.link!.isNotEmpty)
+            .where((element) => element.link != null && element.link!.isNotEmpty)
             .map((element) => element.link!)
             .toList();
 
@@ -304,14 +295,12 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
         }
       }
 
-      _videoPlayerController =
-          VideoPlayerController.networkUrl(Uri.parse(vimeoMp4Video));
+      _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(vimeoMp4Video));
       _setVideoInitialPosition(duration);
       _setVideoListeners();
 
       _flickManager = FlickManager(
-        videoPlayerController:
-            _videoPlayerController ?? _emptyVideoPlayerController,
+        videoPlayerController: _videoPlayerController ?? _emptyVideoPlayerController,
         autoPlay: widget.autoPlay,
         // ignore: use_build_context_synchronously
       )..registerContext(context);
