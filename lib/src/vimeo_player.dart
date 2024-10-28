@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:vimeo_video_player/src/model/flick_portrait_with_settings_controls.dart';
+import 'package:vimeo_video_player/src/model/vimeo_video_request_config.dart';
 
 import 'model/vimeo_video_config.dart';
 
@@ -259,6 +260,38 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
   }
 
   void _videoPlayer(String link, Duration duration) {
+    if (widget.token.isEmpty) {
+      _getVimeoVideoRequestConfigFromUrl(widget.url).then((value) async {
+        final progressiveList = value?.request?.files?.progressive;
+
+        var vimeoMp4Video = '';
+
+        if (progressiveList != null && progressiveList.isNotEmpty) {
+          progressiveList.map((element) {
+            if (element != null && element.url != null && element.url != '' && vimeoMp4Video == '') {
+              vimeoMp4Video = element.url ?? '';
+            }
+          }).toList();
+          if (vimeoMp4Video.isEmpty || vimeoMp4Video == '') {
+            showAlertDialog(context);
+          }
+        }
+
+        _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(vimeoMp4Video));
+        _setVideoInitialPosition(Duration());
+        _setVideoListeners();
+
+        _flickManager = FlickManager(
+          videoPlayerController: _videoPlayerController ?? _emptyVideoPlayerController,
+          autoPlay: widget.autoPlay,
+          // ignore: use_build_context_synchronously
+        )..registerContext(context);
+
+        isVimeoVideoLoaded.value = !isVimeoVideoLoaded.value;
+      });
+      return;
+    }
+
     //! the response of vimeo api was changed
     /// getting the vimeo video configuration from api and setting managers
     _getVimeoVideoConfigFromUrl(widget.url).then((value) async {
@@ -310,6 +343,17 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
   }
 
   /// used to get valid vimeo video configuration
+  Future<VimeoVideoRequestConfig?> _getVimeoVideoRequestConfigFromUrl(
+    String url, {
+    bool trimWhitespaces = true,
+  }) async {
+    if (trimWhitespaces) url = url.trim();
+
+    final response = await _getVimeoVideoRequestConfig(vimeoVideoId: _videoId);
+    return (response != null) ? response : null;
+  }
+
+  /// used to get valid vimeo video configuration
   Future<VimeoVideoConfig?> _getVimeoVideoConfigFromUrl(
     String url, {
     bool trimWhitespaces = true,
@@ -318,6 +362,26 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
 
     final response = await _getVimeoVideoConfig(vimeoVideoId: _videoId);
     return (response != null) ? response : null;
+  }
+
+  /// give vimeo video configuration from api
+  Future<VimeoVideoRequestConfig?> _getVimeoVideoRequestConfig({
+    required String vimeoVideoId,
+  }) async {
+    try {
+      Response responseData = await Dio().get(
+        'https://player.vimeo.com/video/$vimeoVideoId/config',
+        options: widget.dioOptionsForVimeoVideoConfig,
+      );
+      var vimeoVideo = VimeoVideoRequestConfig.fromJson(responseData.data);
+      return vimeoVideo;
+    } on DioException catch (e) {
+      log('Dio Error : ', name: e.error.toString());
+      return null;
+    } on Exception catch (e) {
+      log('Error : ', name: e.toString());
+      return null;
+    }
   }
 
   /// give vimeo video configuration from api
