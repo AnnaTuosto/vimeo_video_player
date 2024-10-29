@@ -41,7 +41,8 @@ class VimeoVideoPlayer extends StatefulWidget {
   /// Used in vimeo video public API call to get the video config
   final Options? dioOptionsForVimeoVideoConfig;
 
-  /// you need to add your vimeo token
+  /// for external video you do not need to add your vimeo token.
+  /// Token is mandatory for unlisted video, optional for own public video
   final String token;
 
   const VimeoVideoPlayer({
@@ -261,7 +262,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
 
   void _videoPlayer(String link, Duration duration) {
     if (widget.token.isEmpty) {
-      _getVimeoVideoRequestConfigFromUrl(widget.url).then((value) async {
+      _getPublicVimeoVideoConfigFromUrl(widget.url).then((value) async {
         final progressiveList = value?.request?.files?.progressive;
 
         var vimeoMp4Video = '';
@@ -293,7 +294,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     }
 
     //! the response of vimeo api was changed
-    /// getting the vimeo video configuration from api and setting managers
+    /// getting the vimeo video configuration from api and setting managers for internal video
     _getVimeoVideoConfigFromUrl(widget.url).then((value) async {
       final progressiveList = value?.files;
 
@@ -342,8 +343,8 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     });
   }
 
-  /// used to get valid vimeo video configuration
-  Future<VimeoVideoRequestConfig?> _getVimeoVideoRequestConfigFromUrl(
+  /// used to get valid vimeo video configuration for external public video
+  Future<VimeoVideoRequestConfig?> _getPublicVimeoVideoConfigFromUrl(
     String url, {
     bool trimWhitespaces = true,
   }) async {
@@ -353,7 +354,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     return (response != null) ? response : null;
   }
 
-  /// used to get valid vimeo video configuration
+  /// used to get valid vimeo video configuration for intern video
   Future<VimeoVideoConfig?> _getVimeoVideoConfigFromUrl(
     String url, {
     bool trimWhitespaces = true,
@@ -364,7 +365,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     return (response != null) ? response : null;
   }
 
-  /// give vimeo video configuration from api
+  /// give vimeo video configuration from api for external video
   Future<VimeoVideoRequestConfig?> _getVimeoVideoRequestConfig({
     required String vimeoVideoId,
   }) async {
@@ -384,7 +385,7 @@ class _VimeoVideoPlayerState extends State<VimeoVideoPlayer> {
     }
   }
 
-  /// give vimeo video configuration from api
+  /// give vimeo video configuration from api for internal video
   Future<VimeoVideoConfig?> _getVimeoVideoConfig({
     required String vimeoVideoId,
   }) async {
